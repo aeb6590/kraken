@@ -4,8 +4,7 @@ C2 bot, that works with jalla server.
 
 # installation 
 
-requires python3
-does not require any other packages, than what is imported in the file 
+requires python3, but does not require any other special packages, than what is imported in the file 
 
 # usage 
 
